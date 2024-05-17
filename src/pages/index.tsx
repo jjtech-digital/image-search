@@ -7,13 +7,12 @@ import { IconCamera, IconCameraOff } from "@tabler/icons-react";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  const webcamRef = useRef(null);
+  const webcamRef = useRef<Webcam>(null);
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [imgSrc, setImgSrc] = useState<any>(null);
 
   const capture = useCallback(() => {
-    const imageSrc = webcamRef?.current.getScreenshot();
-    console.log("image", imageSrc);
+    const imageSrc = webcamRef?.current?.getScreenshot();
     setImgSrc(imageSrc);
   }, [webcamRef]);
   return (
@@ -39,7 +38,7 @@ export default function Home() {
       </div>
 
       <div>
-        {imgSrc && <img src={imgSrc} alt="webcam" />}
+        {imgSrc && <Image src={imgSrc} width={500} height={500} alt="webcam" />}
         {isCameraActive && !imgSrc && (
           <Webcam height={500} width={500} ref={webcamRef} />
         )}

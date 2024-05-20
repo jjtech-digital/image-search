@@ -36,7 +36,7 @@ export default function Home() {
 
   return (
     <main
-      className={`flex min-h-screen flex-col items-center justify-start gap-6 p-20 ${inter.className}`}
+      className={`flex min-h-screen flex-col items-center justify-start gap-6 p-[1.5rem] md:p-20 ${inter.className}`}
     >
       <div className="flex">
         <input
@@ -67,7 +67,7 @@ export default function Home() {
             videoConstraints={videoConstraints}
           />
         )}
-        <div className="p-4 flex gap-3">
+        <div className="my-3 flex gap-3">
           <button
             className="p-3 border-2 border-gray-400 hover:bg-slate-400"
             onClick={imgSrc ? () => setImgSrc(null) : onCapture}

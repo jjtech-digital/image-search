@@ -2,7 +2,11 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import Webcam from "react-webcam";
 import { useState, useRef, useCallback } from "react";
-import { IconCamera, IconCameraOff } from "@tabler/icons-react";
+import {
+  IconCamera,
+  IconCameraOff,
+  IconCameraRotate,
+} from "@tabler/icons-react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,17 +18,18 @@ export default function Home() {
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [imgSrc, setImgSrc] = useState<any>(null);
   const [facingMode, setFacingMode] = useState<string>(FACING_MODE_USER);
-
-  const onCapture = useCallback(() => {
-    const imageSrc = webcamRef?.current?.getScreenshot();
-    setImgSrc(imageSrc);
-  }, [webcamRef]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   let videoConstraints: MediaTrackConstraints = {
     facingMode: facingMode,
     width: 500,
     height: 480,
   };
+
+  const onCapture = useCallback(() => {
+    const imageSrc = webcamRef?.current?.getScreenshot();
+    setImgSrc(imageSrc);
+  }, [webcamRef]);
 
   const toggleCamera = useCallback(() => {
     setFacingMode((prevState) =>
@@ -33,6 +38,39 @@ export default function Home() {
         : FACING_MODE_USER
     );
   }, []);
+
+  // upload image
+  const handleButtonClick = () => {
+    fileInputRef?.current?.click();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setImgSrc(e.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e?.target?.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setImgSrc(e.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <main
@@ -46,16 +84,33 @@ export default function Home() {
         />
         <button
           className="p-2 "
-          onClick={() => setIsCameraActive(!isCameraActive)}
+          onClick={() => {
+            if (imgSrc !== null) {
+              setImgSrc(null);
+            }
+            setIsCameraActive(!isCameraActive);
+          }}
         >
           {isCameraActive ? (
-            <IconCameraOff stroke={2} size={38} />
+            <IconCameraOff
+              stroke={2}
+              size={38}
+              className="hover:text-gray-600"
+            />
           ) : (
-            <IconCamera stroke={2} size={38} />
+            <IconCamera stroke={2} size={38} className="hover:text-gray-600" />
           )}
+        </button>
+        <button className="p-2" onClick={toggleCamera}>
+          <IconCameraRotate
+            stroke={2}
+            size={38}
+            className="hover:text-gray-600"
+          />
         </button>
       </div>
 
+      {/* display image */}
       <div>
         {imgSrc && <Image src={imgSrc} width={500} height={500} alt="webcam" />}
         {isCameraActive && !imgSrc && (
@@ -67,19 +122,34 @@ export default function Home() {
             videoConstraints={videoConstraints}
           />
         )}
-        <div className="my-3 flex gap-3">
+
+        {isCameraActive && (
           <button
-            className="p-3 border-2 border-gray-400 hover:bg-slate-400"
+            className="p-3 my-3 border-2 border-gray-400 hover:bg-slate-400"
             onClick={imgSrc ? () => setImgSrc(null) : onCapture}
           >
             {imgSrc ? "Retake photo" : "Capture photo"}
           </button>
-          <button
-            className="p-3 border-2 border-gray-400 hover:bg-slate-400"
-            onClick={toggleCamera}
-          >
-            Switch camera
-          </button>
+        )}
+      </div>
+      {/* upload image */}
+      <div className="min-w-[350px] flex flex-col gap-3 border-2 border-dashed border-gray-400 rounded text-center  p-8">
+        <button
+          onClick={handleButtonClick}
+          className="text-blue-600 hover:text-blue-800"
+        >
+          Choose a File
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={handleChange}
+        />
+        <p>OR</p>
+        <div onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
+          Drag and drop your image here
         </div>
       </div>
     </main>
